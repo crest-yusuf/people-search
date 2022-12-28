@@ -3,9 +3,6 @@
             <div class="row  col-md-12">
                     <div class="card-header">Search</div>
             </div>
-                <div class="col-md-6">
-                        <Bar :data="chartData" :options="chartOptions" />
-                </div>
             <form @submit.prevent="search">
                 <div class="form-group">
                     <div class="col-md-3">
@@ -43,6 +40,9 @@
             <div class="col-md-6" v-if="total > 0"> We found {{ total }} matches</div>
         </div>
             <div class="row" v-if="total > 0">
+                <div class="col-md-6">
+                        <Bar :data="chartData" :options="chartOptions" />
+                </div>
                 <table class="table">
                     <thead>
                         <tr>

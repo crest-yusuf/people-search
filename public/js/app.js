@@ -5774,7 +5774,7 @@ window.Vue = (__webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js
 
 vue__WEBPACK_IMPORTED_MODULE_2__["default"].use(vue_router__WEBPACK_IMPORTED_MODULE_3__["default"]);
 vue__WEBPACK_IMPORTED_MODULE_2__["default"].use(vue_axios__WEBPACK_IMPORTED_MODULE_1__["default"], (axios__WEBPACK_IMPORTED_MODULE_0___default()));
-vue__WEBPACK_IMPORTED_MODULE_2__["default"].prototype.$baseUrl = 'http://127.0.0.1:8001/api';
+vue__WEBPACK_IMPORTED_MODULE_2__["default"].prototype.$baseUrl = 'http://127.0.0.1:8000/api';
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -29199,17 +29199,6 @@ var render = function () {
     _vm._m(0),
     _vm._v(" "),
     _c(
-      "div",
-      { staticClass: "col-md-6" },
-      [
-        _c("Bar", {
-          attrs: { data: _vm.chartData, options: _vm.chartOptions },
-        }),
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
       "form",
       {
         on: {
@@ -29367,6 +29356,17 @@ var render = function () {
     _vm._v(" "),
     _vm.total > 0
       ? _c("div", { staticClass: "row" }, [
+          _c(
+            "div",
+            { staticClass: "col-md-6" },
+            [
+              _c("Bar", {
+                attrs: { data: _vm.chartData, options: _vm.chartOptions },
+              }),
+            ],
+            1
+          ),
+          _vm._v(" "),
           _c("table", { staticClass: "table" }, [
             _c("thead", [
               _c(

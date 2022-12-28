@@ -16,7 +16,7 @@ import VueAxios from 'vue-axios'
 Vue.use(VueRouter)
 Vue.use(VueAxios, axios)
 
-Vue.prototype.$baseUrl = 'http://127.0.0.1:8001/api'
+Vue.prototype.$baseUrl = 'http://127.0.0.1:8000/api'
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
