@@ -1,24 +1,18 @@
 <template>
-        <div class="justify-content-center">
-            <div class="row  col-md-12">
-                    <div class="card-header">Search</div>
-            </div>
-            <form @submit.prevent="search">
-                <div class="form-group">
-                    <div class="col-md-3">
+        <div>
+            <form class="form-search" @submit.prevent="search">
+                <div class="row">
+                <div class="form-group col-md-1"></div>
+                <div class="form-group col-md-2">
                         <label for="name">First Name</label>
                         <input type="text" class="form-control" v-model="form.firstName" required>
-                    </div>
                 </div>
-                <div class="form-group">
-                    <div class="col-md-3">
+                <div class="form-group col-md-2">
                     <label for="lastName">Last Name</label>
                     <input type="text" class="form-control" v-model="form.lastName" required>
                 </div>
-                </div>
                 
-
-                <div class="form-group col-md-3">
+                <div class="form-group col-md-2">
                     <label for="City">City</label>
                     <input type="text" class="form-control" v-model="form.city">
                 </div>
@@ -31,21 +25,25 @@
                         </template>
                     </select>
                 </div>
-                <br>
-                <div class="form-group col-md-3">
-                    <button type="submit" class="form-control btn btn-info">Search</button>
+                
+                <div class="form-group col-md-1">
+                    <label></label>
+                    <button type="submit" class="form-control btn btn-success" :disabled="isSearchDisabled">Search</button>
                 </div>
+                <div class="form-group col-md-1"></div>
+            </div>
             </form>
         <div class="row">
-            <div class="col-md-6" v-if="total > 0"> We found {{ total }} matches</div>
+            <div class="col-md-6"></div>
+            <div class="col-md-6" v-if="total > 0"> <h3 class="record-found-title"> We found <span>{{ total }}</span> matches </h3>  </div>
         </div>
             <div class="row" v-if="total > 0">
                 <div class="col-md-6">
                         <Bar :data="chartData" :options="chartOptions" />
                 </div>
-                <table class="table">
+                <table class="table table-striped">
                     <thead>
-                        <tr>
+                        <tr class="header">
                         <th scope="col" v-for="(title, key) in this.titles" :key="key">{{ title }}</th>
                         <th scope="col">Score</th>
                         </tr>
@@ -53,18 +51,21 @@
                     <tbody>
                         <tr v-for="(value, index) in this.searchData" :key="index">
                             <td>{{ value.Name }}</td>
-                            <td>{{ value.Age }}</td>
+                            <td class="td-age"> <span v-if="value.Age !=''">{{ value.Age }}</span></td>
                             <td>{{ value.phone_numbers }}</td>
                             <td>{{ value.releted_people }}</td>
                             <td>{{ value.Location }}</td>
-                            <td>{{ value | countScore(form, percentPerFillup) }}</td>
+                            <td class="td-score">{{ value | countScore(form, percentPerFillup) }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="row">
-                <div class="col-md-6" >
-                    <button v-if="currentPage > 1" class="btn btn-primary" @click="requestPage(parseInt(currentPage) - 1)">Previous</button>
+            <div class="row pagination-div">
+                <div class="col-md-10"></div>
+                <div class="col-md-1">
+                    <button v-if="currentPage > 1" class="btn btn-primary" @click="requestPage(parseInt(currentPage) - 1)">Previous</button> 
+                </div>
+                <div class="col-md-1">
                     <button v-if="currentPage < totalPages" class="btn btn-primary" @click="requestPage(parseInt(currentPage) + 1)">Next</button>
                 </div>
             </div>
@@ -72,7 +73,6 @@
 </template>
 
 <script>
-
 import {
   Chart as ChartJS,
   Title,
@@ -124,18 +124,6 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
             return {
                 chartArray: [],
-                oldchartData: {
-                    labels: [ 'Under 30', '30 to 50', 'Above 50' ],
-                    datasets: [ {
-                        label: 'Found',
-                        backgroundColor: [
-                            'rgba(255, 255, 132, 0.2)',
-                            ],
-                            borderColor: [
-                            'rgb(255, 99, 132)',
-                        ],   
-                         data: [40, 20, 12] } ]
-                },
                 chartOptions: {
                     responsive: true
                 },
@@ -163,6 +151,7 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
                         { code: "TN" , label : 'Tennessee'},{ code: "TX" , label : 'Texas'},{ code: "UT" , label : 'Utah'},{ code: "VT" , label : 'Vermont'},{ code: "VA" , label : 'Virginia'},{ code: "WA" , label : 'Washington'},
                         { code: "WV" , label : 'West Virginia'},{ code: "WI" , label : 'Wisconsin'}, { code: "WY" , label : 'Wyoming'}, { code: "DC" , label : 'District of Columbia'}    
                  ],
+                 isSearchDisabled: false,
                  percentPerFillup: 0,
 
             }
@@ -190,6 +179,8 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
                 })
             },
             search() {
+                this.isSearchDisabled = true
+
                 this.countFillup()
                 // return false
                 let searchUrl = `${this.$baseUrl}/search`;
@@ -202,6 +193,7 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
                 this.total = data.total
                 this.getTotalPages()
                 this.prepareChart()
+                this.isSearchDisabled = false
                 })
             },
             getTotalPages(){        
@@ -239,7 +231,61 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 .row {
     margin-top: 20px;
 }
-table.result-list {
+table {
     margin-top: 10px;
+    border-bottom-width: 0px !important;
 }
+.form-search {
+    margin-top: 20px;
+    /* background-color: #426cce; */
+    padding: 10px 10px 40px;
+    border-radius: 5px;
+}
+.form-search label {
+    font-family: auto;
+}
+
+/* .td-age {
+    background-color: #2b850f;
+     border-radius: 15%; 
+}
+.td-age span {
+    background: #c8a913;
+    border-radius: 50%;
+    padding: 5px;
+}
+.td-score {
+    background-color: #2b850f;
+    color: white !important;
+    font-weight: bold;
+} */
+
+.form-search, tr.header{
+    background: #426cce;
+}
+tr.header{
+    color: white;
+    border-radius: 10px;
+}
+.record-found-title{
+    float: right;
+    color: #055c05;
+
+}
+
+form label {
+    color: white;
+}
+
+.record-found-title span{
+    color: white;
+    border-radius: 25%;
+    background: black;
+    padding: 5px;
+}
+.pagination-div button{
+    float: left;
+    margin-right: 10px
+}
+
 </style>

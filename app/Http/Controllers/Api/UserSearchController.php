@@ -4,94 +4,61 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Services\SearchPeopleService;
+use App\Http\Traits\HttpResponse;
 use DOMDocument;
 use DOMXPath;
 use Exception;
-use Facade\FlareClient\Http\Response;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class UserSearchController extends Controller
 {
 
+    use HttpResponse;
+
     protected $searchPeopleServiceObject;
     protected $perPage = 20;
+    const HTTP_POST = 'POST';
 
     function __construct(SearchPeopleService $searchPeopleService) {
         $this->searchPeopleServiceObject = $searchPeopleService;
     }
 
-    function requestPage() {
-        try{
-            $response2 = $this->searchPeopleServiceObject->getSearchResult();
-            $doc = new DOMDocument();
-            $doc->loadHtml($response2, LIBXML_NOERROR);
-            
-            $xpath = new DOMXPath($doc);
-            
-            $labels = ['Name','Age','Phone Numbers','Releted People','Location'];
-            
-            $data = $this->getRows($xpath);
-    
-            $formatArray = $this->getArrayFormat($data);
-            $totalRecords = $this->getTotalrecords($xpath);
-     
-            $response['titles'] = $labels;
-            $response['list'] = $formatArray;
-            $response['total'] = $totalRecords;
-                        
-            return response()->json([
-                'data' => $response,
-                'message' => 'Search List', 'code' => 200]);
-    
-        } catch(Exception $e) {
-            Log::info('Search Result Error'.$e->getMessage());
-            return response()->json([
-                'data' => null,
-                'msg' => 'Something wnet wrong',
-                'code' => 500
-            ]);
-        }
-    }
-
     function search() {
     try {
 
-        $request = request()->all(); 
-        $requestData = "firstName=".$request['firstName']."&lastName=".$request['lastName']."&city=".$request['city']."&state=".$request['state'];
-        
-        // Search Result By Value
-        $this->searchPeopleServiceObject->search($requestData);
+        // call curl for Requested Search 
+        if(request()->getMethod() == self::HTTP_POST) {
+            $request = request()->all(); 
+            $requestData = "firstName=".$request['firstName']."&lastName=".$request['lastName']."&city=".$request['city']."&state=".$request['state'];
+            
+            $this->searchPeopleServiceObject->search($requestData);
+        }
     
-        // get Result Response
+        // get Result Response and also same for pagination
         $response2 = $this->searchPeopleServiceObject->getSearchResult();
+
         $doc = new DOMDocument();
-        $doc->loadHtml($response2, LIBXML_NOERROR);
+        $doc->loadHtml($response2, LIBXML_NOERROR); // Load Target Html
         
         $xpath = new DOMXPath($doc);
         
-        $labels = ['Name','Age','Phone Numbers','Releted People','Location'];
+        $labels = ['Name','Age','Phone','Releted People','Location'];
         
-        $data = $this->getRows($xpath);
-
-        $formatArray = $this->getArrayFormat($data);
-        $totalRecords = $this->getTotalrecords($xpath);
+        $rows = $this->getRows($xpath); // Get rows from HTML content
+        $formatArray = $this->getArrayFormat($rows); // Prepare Array For Response 
+        $totalRecords = $this->getTotalrecords($xpath); // Get Total 
  
-        $response['titles'] = $labels;
-        $response['list'] = $formatArray;
-        $response['total'] = $totalRecords;
+        $response = [
+            'titles' => $labels,
+            'list' => $formatArray,
+            'total' => $totalRecords
+        ];
         
-        return response()->json([
-            'data' => $response,
-            'message' => 'Search List', 'code' => 200]);
+        return $this->success($response, 'Search List', 200);
 
     } catch(Exception $e) {
         Log::info('Search Result Error'.$e->getMessage());
-        return response()->json([
-            'data' => null,
-            'msg' => 'Something wnet wrong',
-            'code' => 500
-        ]);
+        return $this->error('Something went wrong', 500);
     }
     }
 
