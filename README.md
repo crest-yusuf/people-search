@@ -6,6 +6,7 @@
 Run commands
 
 1. composer install
+1. php artisan key:generate
 2. npm install
 3. npm run watch 
 4. php artisan serve
