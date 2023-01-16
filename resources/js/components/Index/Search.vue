@@ -1,235 +1,426 @@
 <template>
+    <div>
         <div>
-            <form class="form-search" @submit.prevent="search">
-                <div class="row">
+            <b-button v-b-modal.modal-1>Launch demo modal</b-button>
+
+            <b-modal
+                ref="my-modal"
+                size="lg"
+                hide-footer
+                title="Using Component Methods"
+            >
+                <div class="modal-body">
+                    <div>
+                        <span class="label">Name:</span> <br />
+                        <span class="value name">{{ popupData.name }}</span>
+                    </div>
+                    <div>
+                        <span class="label">Age:</span> <br />
+                        <span class="value">{{ popupData.age }}</span>
+                    </div>
+                    <div>
+                        <span class="label">Address:</span> <br />
+                        <span class="value">{{ popupData.location }}</span>
+                    </div>
+                </div>
+                <b-button
+                    class="mt-3"
+                    variant="outline-danger"
+                    block
+                    @click="hideModal"
+                    >x</b-button
+                >
+            </b-modal>
+        </div>
+        <form class="form-search" @submit.prevent="search">
+            <div class="row">
                 <div class="form-group col-md-1"></div>
                 <div class="form-group col-md-2">
-                        <label for="name">First Name</label>
-                        <input type="text" class="form-control" v-model="form.firstName" required>
+                    <label for="name">First Name</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        v-model="form.firstName"
+                        required
+                    />
                 </div>
                 <div class="form-group col-md-2">
                     <label for="lastName">Last Name</label>
-                    <input type="text" class="form-control" v-model="form.lastName" required>
+                    <input
+                        type="text"
+                        class="form-control"
+                        v-model="form.lastName"
+                        required
+                    />
                 </div>
-                
+
                 <div class="form-group col-md-2">
                     <label for="City">City</label>
-                    <input type="text" class="form-control" v-model="form.city">
+                    <input
+                        type="text"
+                        class="form-control"
+                        v-model="form.city"
+                    />
                 </div>
                 <div class="form-group col-md-3">
                     <label for="state">State</label>
-                    <select id="state" class="form-control" name="state" v-model="form.state">
+                    <select
+                        id="state"
+                        class="form-control"
+                        name="state"
+                        v-model="form.state"
+                    >
                         <option value="">All States</option>
-                        <template v-for="(state,key) in states">
-                            <option :value="state.code">{{ state.label }}</option>
+                        <template v-for="(state, key) in states">
+                            <option :value="state.code">
+                                {{ state.label }}
+                            </option>
                         </template>
                     </select>
                 </div>
-                
+
                 <div class="form-group col-md-1">
                     <label></label>
-                    <button type="submit" class="form-control btn btn-success" :disabled="isSearchDisabled">Search</button>
+                    <button
+                        type="submit"
+                        class="form-control btn btn-success"
+                        :disabled="isSearchDisabled"
+                    >
+                        Search
+                    </button>
                 </div>
                 <div class="form-group col-md-1"></div>
             </div>
-            </form>
+        </form>
         <div class="row">
             <div class="col-md-6"></div>
-            <div class="col-md-6" v-if="total > 0"> <h3 class="record-found-title"> We found <span>{{ total }}</span> matches </h3>  </div>
+            <div class="col-md-6" v-if="total > 0">
+                <h3 class="record-found-title">
+                    We found <span>{{ total }}</span> matches
+                </h3>
+            </div>
         </div>
-            <div class="row" v-if="total > 0">
-                <div class="col-md-6">
-                        <Bar :data="chartData" :options="chartOptions" />
-                </div>
-                <table class="table table-striped">
-                    <thead>
-                        <tr class="header">
-                        <th scope="col" v-for="(title, key) in this.titles" :key="key">{{ title }}</th>
+        <div class="row" v-if="total > 0">
+            <div class="col-md-6">
+                <Bar :data="chartData" :options="chartOptions" />
+            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr class="header">
+                        <th
+                            scope="col"
+                            v-for="(title, key) in this.titles"
+                            :key="key"
+                        >
+                            {{ title }}
+                        </th>
                         <th scope="col">Score</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(value, index) in this.searchData" :key="index">
+                    </tr>
+                </thead>
+                <tbody>
+                    <template v-for="(value, index) in this.searchData">
+                        <tr
+                            @click="
+                                showAddress(
+                                    value.Name,
+                                    value.Age,
+                                    value.readableLocation
+                                )
+                            "
+                            :key="index"
+                        >
                             <td>{{ value.Name }}</td>
-                            <td class="td-age"> <span v-if="value.Age !=''">{{ value.Age }}</span></td>
+                            <td class="td-age">
+                                <span v-if="value.Age != ''">{{
+                                    value.Age
+                                }}</span>
+                            </td>
                             <td>{{ value.phone_numbers }}</td>
                             <td>{{ value.releted_people }}</td>
                             <td>{{ value.Location }}</td>
-                            <td class="td-score">{{ value | countScore(form, percentPerFillup) }}</td>
+                            <td class="td-score">
+                                {{ value | countScore(form, percentPerFillup) }}
+                            </td>
                         </tr>
-                    </tbody>
-                </table>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+        <div class="row pagination-div">
+            <div class="col-md-10"></div>
+            <div class="col-md-1">
+                <button
+                    v-if="currentPage > 1"
+                    class="btn btn-primary"
+                    @click="requestPage(parseInt(currentPage) - 1)"
+                >
+                    Previous
+                </button>
             </div>
-            <div class="row pagination-div">
-                <div class="col-md-10"></div>
-                <div class="col-md-1">
-                    <button v-if="currentPage > 1" class="btn btn-primary" @click="requestPage(parseInt(currentPage) - 1)">Previous</button> 
-                </div>
-                <div class="col-md-1">
-                    <button v-if="currentPage < totalPages" class="btn btn-primary" @click="requestPage(parseInt(currentPage) + 1)">Next</button>
-                </div>
+            <div class="col-md-1">
+                <button
+                    v-if="currentPage < totalPages"
+                    class="btn btn-primary"
+                    @click="requestPage(parseInt(currentPage) + 1)"
+                >
+                    Next
+                </button>
             </div>
-        </div>                    
+        </div>
+    </div>
 </template>
 
 <script>
 import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  BarElement,
-  CategoryScale,
-  LinearScale
-} from 'chart.js'
-import { Bar } from 'vue-chartjs'
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
+    Chart as ChartJS,
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+} from "chart.js";
+import { Bar } from "vue-chartjs";
+ChartJS.register(
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale
+);
 
-    export default {
-        components: { Bar },
-        filters: {
-            countScore: (currentRecord, searchRecord, percentPerFillup) => {
-                console.log('currentRecord',percentPerFillup, searchRecord.city, searchRecord.state)
+export default {
+    components: { Bar },
+    filters: {
+        countScore: (currentRecord, searchRecord, percentPerFillup) => {
+            console.log(
+                "currentRecord",
+                percentPerFillup,
+                searchRecord.city,
+                searchRecord.state
+            );
 
-                let score = percentPerFillup + percentPerFillup             
-            if(searchRecord.city != '' && currentRecord.Location.toLowerCase().includes(searchRecord.city.toLowerCase())) {
-                score += percentPerFillup
+            let score = percentPerFillup + percentPerFillup;
+            if (
+                searchRecord.city != "" &&
+                currentRecord.Location.toLowerCase().includes(
+                    searchRecord.city.toLowerCase()
+                )
+            ) {
+                score += percentPerFillup;
             }
-            
-            if(searchRecord.state != '' &&  currentRecord.Location.toLowerCase().includes(searchRecord.state.toLowerCase())) {
-                score +=percentPerFillup
+
+            if (
+                searchRecord.state != "" &&
+                currentRecord.Location.toLowerCase().includes(
+                    searchRecord.state.toLowerCase()
+                )
+            ) {
+                score += percentPerFillup;
             }
-                // console.log('form', this.form)
-                return Math.round(score)
-            }
+            // console.log('form', this.form)
+            return Math.round(score);
         },
-        computed: {
-        chartData() {             
+    },
+    computed: {
+        chartData() {
             let UpdateData = {
-                    labels: [ 'Under 30', '30 to 50', 'Above 50' ],
-                    datasets: [ {
-                        label: 'Found Data',
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)',
-                            ],
-                            borderColor: [
-                            'rgb(255, 99, 132)',
-                        ],   
-                         data: this.chartArray } ]
-                }
-            return UpdateData
-         },
+                labels: ["Under 30", "30 to 50", "Above 50"],
+                datasets: [
+                    {
+                        label: "Found Data",
+                        backgroundColor: ["rgba(255, 99, 132, 0.2)"],
+                        borderColor: ["rgb(255, 99, 132)"],
+                        data: this.chartArray,
+                    },
+                ],
+            };
+            return UpdateData;
         },
-        data: () => {
-
-            return {
-                chartArray: [],
-                chartOptions: {
-                    responsive: true
-                },
-                form:{ 
-                    firstName:'',
-                    lastName:'',
-                    city:'',
-                    state:'',
-                 },
-                 total: 0,
-                 perPage: 20,
-                 totalPages: 1,
-                 currentPage: 1, 
-                 searchData: [],
-                 titles: [],
-                 states:[                    
-                        { code: "AL" , label : 'Alabama'}, { code: "AK" , label : 'Alaska'}, { code: "AZ" , label : 'Arizona'}, { code: "AR" , label : 'Arkansas'},{ code: "CA" , label : 'California'},
-                        { code: "CO" , label : 'Colorado'},{ code: "CT" , label : 'Connecticut'},{ code: "DE" , label : 'Delaware'},{ code: "FL" , label : 'Florida'},{ code: "GA" , label : 'Georgia'},
-                        { code: "HI" , label : 'Hawaii'},{ code: "ID" , label : 'Idaho'},{ code: "IL" , label : 'Illinois'},{ code: "IN" , label : 'Indiana'},{ code: "IA" , label : 'Iowa'},{ code: "KS" , label : 'Kansas'},
-                        { code: "KY" , label : 'Kentucky'},{ code: "LA" , label : 'Louisiana'}, { code: "ME" , label : 'Maine'}, { code: "MD" , label : 'Maryland'}, { code: "MA" , label : 'Massachusetts'},
-                        { code: "MI" , label : 'Michigan'}, { code: "MN" , label : 'Minnesota'}, { code: "MS" , label : 'Mississippi'}, { code: "MO" , label : 'Missouri'}, { code: "MT" , label : 'Montana'}, 
-                        { code: "NE" , label : 'Nebraska'},{ code: "NV" , label : 'Nevada'},{ code: "NH" , label : 'New Hampshire'},{ code: "NJ" , label : 'New Jersey'},{ code: "NM" , label : 'New Mexico'},
-                        { code: "NY" , label : 'New York'},{ code: "NC" , label : 'North Carolina'},{ code: "ND" , label : 'North Dakota'},{ code: "OH" , label : 'Ohio'},{ code: "OK" , label : 'Oklahoma'},
-                        { code: "OR" , label : 'Oregon'},{ code: "PA" , label : 'Pennsylvania'},{ code: "RI" , label : 'Rhode Island'},{ code: "SC" , label : 'South Carolina'},{ code: "SD" , label : 'South Dakota'},
-                        { code: "TN" , label : 'Tennessee'},{ code: "TX" , label : 'Texas'},{ code: "UT" , label : 'Utah'},{ code: "VT" , label : 'Vermont'},{ code: "VA" , label : 'Virginia'},{ code: "WA" , label : 'Washington'},
-                        { code: "WV" , label : 'West Virginia'},{ code: "WI" , label : 'Wisconsin'}, { code: "WY" , label : 'Wyoming'}, { code: "DC" , label : 'District of Columbia'}    
-                 ],
-                 isSearchDisabled: false,
-                 percentPerFillup: 0,
-
+    },
+    data: () => {
+        return {
+            popupData: {
+                name: "",
+                age: "",
+                locatio: "",
+            },
+            chartArray: [],
+            chartOptions: {
+                responsive: true,
+            },
+            form: {
+                firstName: "",
+                lastName: "",
+                city: "",
+                state: "",
+            },
+            total: 0,
+            perPage: 20,
+            totalPages: 1,
+            currentPage: 1,
+            searchData: [],
+            titles: [],
+            states: [
+                { code: "AL", label: "Alabama" },
+                { code: "AK", label: "Alaska" },
+                { code: "AZ", label: "Arizona" },
+                { code: "AR", label: "Arkansas" },
+                { code: "CA", label: "California" },
+                { code: "CO", label: "Colorado" },
+                { code: "CT", label: "Connecticut" },
+                { code: "DE", label: "Delaware" },
+                { code: "FL", label: "Florida" },
+                { code: "GA", label: "Georgia" },
+                { code: "HI", label: "Hawaii" },
+                { code: "ID", label: "Idaho" },
+                { code: "IL", label: "Illinois" },
+                { code: "IN", label: "Indiana" },
+                { code: "IA", label: "Iowa" },
+                { code: "KS", label: "Kansas" },
+                { code: "KY", label: "Kentucky" },
+                { code: "LA", label: "Louisiana" },
+                { code: "ME", label: "Maine" },
+                { code: "MD", label: "Maryland" },
+                { code: "MA", label: "Massachusetts" },
+                { code: "MI", label: "Michigan" },
+                { code: "MN", label: "Minnesota" },
+                { code: "MS", label: "Mississippi" },
+                { code: "MO", label: "Missouri" },
+                { code: "MT", label: "Montana" },
+                { code: "NE", label: "Nebraska" },
+                { code: "NV", label: "Nevada" },
+                { code: "NH", label: "New Hampshire" },
+                { code: "NJ", label: "New Jersey" },
+                { code: "NM", label: "New Mexico" },
+                { code: "NY", label: "New York" },
+                { code: "NC", label: "North Carolina" },
+                { code: "ND", label: "North Dakota" },
+                { code: "OH", label: "Ohio" },
+                { code: "OK", label: "Oklahoma" },
+                { code: "OR", label: "Oregon" },
+                { code: "PA", label: "Pennsylvania" },
+                { code: "RI", label: "Rhode Island" },
+                { code: "SC", label: "South Carolina" },
+                { code: "SD", label: "South Dakota" },
+                { code: "TN", label: "Tennessee" },
+                { code: "TX", label: "Texas" },
+                { code: "UT", label: "Utah" },
+                { code: "VT", label: "Vermont" },
+                { code: "VA", label: "Virginia" },
+                { code: "WA", label: "Washington" },
+                { code: "WV", label: "West Virginia" },
+                { code: "WI", label: "Wisconsin" },
+                { code: "WY", label: "Wyoming" },
+                { code: "DC", label: "District of Columbia" },
+            ],
+            isSearchDisabled: false,
+            percentPerFillup: 0,
+        };
+    },
+    methods: {
+        showAddress(name, age, readableLocation) {
+            this.popupData.name = name;
+            this.popupData.age = age;
+            this.popupData.location = readableLocation;
+            console.log("fullLocation", readableLocation);
+            this.$refs["my-modal"].show();
+        },
+        hideModal() {
+            this.$refs["my-modal"].hide();
+        },
+        countFillup() {
+            let count = 0;
+            for (const key in this.form) {
+                if (this.form[key] != "") {
+                    count += 1;
+                }
+                console.log(`${key}: ${this.form[key]}`);
             }
+            this.percentPerFillup = 100 / count;
         },
-        methods:{
-            countFillup() {
-                let count = 0;
-                for (const key in this.form) {
+        requestPage(pageNumber) {
+            this.currentPage = pageNumber;
+            let url = `${this.$baseUrl}/request-page?page=${pageNumber}`;
+            this.axios.get(url).then((response) => {
+                const { data } = response.data;
+                this.searchData = data.list;
+                this.titles = data.titles;
+                this.prepareChart();
+            });
+        },
+        search() {
+            this.isSearchDisabled = true;
 
-                    if(this.form[key] != '') {
-                        count+=1
-                    }
-                    console.log(`${key}: ${this.form[key]}`);
-                }
-                this.percentPerFillup = (100/count)
-            },
-            requestPage(pageNumber) {
-                this.currentPage = pageNumber
-                let url = `${this.$baseUrl}/request-page?page=${pageNumber}`;
-                this.axios.get(url).then((response) => {
-                const { data } = response.data
-                this.searchData = data.list
-                this.titles = data.titles
-                this.prepareChart()
-                })
-            },
-            search() {
-                this.isSearchDisabled = true
-
-                this.countFillup()
-                // return false
-                let searchUrl = `${this.$baseUrl}/search`;
-                this.axios.post(searchUrl,this.form).then((response) => {
-                const { data } = response.data
-                this.searchData = data.list
-                this.titles = data.titles
-                this.currentPage = 1
+            this.countFillup();
+            // return false
+            let searchUrl = `${this.$baseUrl}/search`;
+            this.axios.post(searchUrl, this.form).then((response) => {
+                const { data } = response.data;
+                this.searchData = data.list;
+                this.titles = data.titles;
+                this.currentPage = 1;
                 // this.currentPage = data.currentPage
-                this.total = data.total
-                this.getTotalPages()
-                this.prepareChart()
-                this.isSearchDisabled = false
-                })
-            },
-            getTotalPages(){        
-                this.totalPages = Math.ceil(this.total / this.perPage);
-            },
-            prepareChart () {
-                let Under30 = 0;
-                let thirty1toFifty = 0;
-                let FiftyAbove = 0;
-                for (let i = 0; i < this.searchData.length; i++) {
-                    let age = this.searchData[i].Age
-                    if (age <= 30) {
-                        Under30+=1
-                    }
-
-                    if (age >= 31  && age <= 50) {
-                        thirty1toFifty+=1
-                    }
-
-                    if (age >= 51) {
-                        FiftyAbove+=1
-                    }
-                }
-                this.chartArray = [Under30, thirty1toFifty, FiftyAbove]
-                // console.log('Under30', Under30, thirty1toFifty)
-
-            }
+                this.total = data.total;
+                this.getTotalPages();
+                this.prepareChart();
+                this.isSearchDisabled = false;
+            });
         },
-        mounted() {
-            console.log('Component mounted.', this.chartData)
-        }
-    }
+        getTotalPages() {
+            this.totalPages = Math.ceil(this.total / this.perPage);
+        },
+        prepareChart() {
+            let Under30 = 0;
+            let thirty1toFifty = 0;
+            let FiftyAbove = 0;
+            for (let i = 0; i < this.searchData.length; i++) {
+                let age = this.searchData[i].Age;
+                if (age <= 30) {
+                    Under30 += 1;
+                }
+
+                if (age >= 31 && age <= 50) {
+                    thirty1toFifty += 1;
+                }
+
+                if (age >= 51) {
+                    FiftyAbove += 1;
+                }
+            }
+            this.chartArray = [Under30, thirty1toFifty, FiftyAbove];
+            // console.log('Under30', Under30, thirty1toFifty)
+        },
+    },
+    mounted() {
+        // this.showAddress();
+        // console.log("Component mounted.", this.chartData);
+    },
+};
 </script>
 <style scoped>
 .row {
     margin-top: 20px;
+}
+.modal-body {
+    display: flex;
+    column-gap: 44px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-body div span.label {
+    color: #9696bb;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+.modal-body div span.value {
+    font-size: 18px;
+    font-weight: 700;
+}
+.modal-body div span.name {
+    color: #577cfc;
 }
 table {
     margin-top: 10px;
@@ -247,7 +438,7 @@ table {
 
 /* .td-age {
     background-color: #2b850f;
-     border-radius: 15%; 
+     border-radius: 15%;
 }
 .td-age span {
     background: #c8a913;
@@ -260,32 +451,31 @@ table {
     font-weight: bold;
 } */
 
-.form-search, tr.header{
+.form-search,
+tr.header {
     background: #426cce;
 }
-tr.header{
+tr.header {
     color: white;
     border-radius: 10px;
 }
-.record-found-title{
+.record-found-title {
     float: right;
     color: #055c05;
-
 }
 
 form label {
     color: white;
 }
 
-.record-found-title span{
+.record-found-title span {
     color: white;
     border-radius: 25%;
     background: black;
     padding: 5px;
 }
-.pagination-div button{
+.pagination-div button {
     float: left;
-    margin-right: 10px
+    margin-right: 10px;
 }
-
 </style>

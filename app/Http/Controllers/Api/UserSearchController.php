@@ -25,7 +25,7 @@ class UserSearchController extends Controller
 
     function search() {
     try {
-
+        
         // call curl for Requested Search 
         if(request()->getMethod() == self::HTTP_POST) {
             $request = request()->all(); 
@@ -78,7 +78,8 @@ class UserSearchController extends Controller
                 'Age' => $data['Age'][$key],
                 'phone_numbers' => $data['phone_numbers'][$key],
                 'releted_people' => $data['releted_people'][$key],
-                'Location' => $data['Location'][$key]
+                'Location' => $data['Location'][$key],
+                'readableLocation' => $data['readableLocation'][$key]
             ];
         }
         return $formatArray;
@@ -86,15 +87,26 @@ class UserSearchController extends Controller
 
     protected function getRows($xpath) {
         $query = '//ul[@class="list-result"]//li[@class="result-list-item"]//div[@class="item-wrapper"]';        
+        $locationsQuery = '//ul[@class="list-result"]//li[@class="result-list-item"]';
+        $locations = $xpath->query($locationsQuery);
+        
+        $fullLocation = [];
+        foreach ($locations as $key => $location) {
+            $fullLocation[] = $location->getAttribute('data-location');
+        }
+
         $entries = $xpath->query($query);
         $data = [];
         $titlesArray = ['Name','Age','phone_numbers','releted_people','Location'];
         foreach ($entries as $key => $entry) {
+
             $title =  $xpath->evaluate('string(div[@class="result-label"])', $entry);
             $info =  $xpath->evaluate('string(div[@class="result-info"])', $entry);
             
-            if(in_array($title,['Name','Age']))
-                $info  = $xpath->evaluate('string(div[@class="result-info bold"])', $entry);    
+            // dd($entry->parentNode->getAttribute('data-location'));
+            if(in_array($title,['Name','Age'])){
+                $info  = $xpath->evaluate('string(div[@class="result-info bold"])', $entry);
+            }
     
             if($title == 'Phone Numbers') {
                 $title = 'phone_numbers';
@@ -114,9 +126,9 @@ class UserSearchController extends Controller
     
             if(in_array($title, $titlesArray)){
                 $data[$title][] = $info;
-            }     
+            }
         }
-
+        $data['readableLocation'] = $fullLocation;
         return $data;
     }
 }

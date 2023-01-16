@@ -20,5 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
+Route::get('/',[UserSearchController::class, 'getCookie']); 
 Route::post('search',[UserSearchController::class, 'search']); 
 Route::get('request-page',[UserSearchController::class, 'search']); 
