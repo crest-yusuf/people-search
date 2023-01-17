@@ -1,14 +1,7 @@
 <template>
     <div>
         <div>
-            <b-button v-b-modal.modal-1>Launch demo modal</b-button>
-
-            <b-modal
-                ref="my-modal"
-                size="lg"
-                hide-footer
-                title="Using Component Methods"
-            >
+            <b-modal ref="my-modal" size="lg" hide-footer title="User Address">
                 <div class="modal-body">
                     <div>
                         <span class="label">Name:</span> <br />
@@ -119,16 +112,7 @@
                 </thead>
                 <tbody>
                     <template v-for="(value, index) in this.searchData">
-                        <tr
-                            @click="
-                                showAddress(
-                                    value.Name,
-                                    value.Age,
-                                    value.readableLocation
-                                )
-                            "
-                            :key="index"
-                        >
+                        <tr @click="showAddress(value)" :key="index">
                             <td>{{ value.Name }}</td>
                             <td class="td-age">
                                 <span v-if="value.Age != ''">{{
@@ -244,7 +228,7 @@ export default {
             popupData: {
                 name: "",
                 age: "",
-                locatio: "",
+                location: "",
             },
             chartArray: [],
             chartOptions: {
@@ -320,12 +304,13 @@ export default {
         };
     },
     methods: {
-        showAddress(name, age, readableLocation) {
-            this.popupData.name = name;
-            this.popupData.age = age;
-            this.popupData.location = readableLocation;
-            console.log("fullLocation", readableLocation);
-            this.$refs["my-modal"].show();
+        showAddress(user) {
+            this.$nextTick(() => {
+                this.popupData.name = user.Name;
+                this.popupData.age = user.Age;
+                this.popupData.location = user.readableLocation;
+                this.$refs["my-modal"].show();
+            });
         },
         hideModal() {
             this.$refs["my-modal"].hide();
